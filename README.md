@@ -67,3 +67,13 @@ REMOTE_PORT='18006'
 ## 注意
 
 不要把服务器 SSH 密码、真实业务密码、Cloudflare Token、GitHub Token 等敏感信息提交到这个公开仓库。需要用到密码时，用环境变量传入，或者让脚本运行时交互输入。
+
+## 排障
+
+登录页能打开，但登录后进不去 Proxmox 时，先在公网服务器执行：
+
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/HCRXchenghong/bash-test/main/scripts/proxmox-frp-debug.sh)
+```
+
+重点看 `127.0.0.1:18006` 是否可连接。不可连接通常说明本地 `frpc` 没有运行、token 不一致，或者本地机器访问不到 `192.168.123.10:8006`。
