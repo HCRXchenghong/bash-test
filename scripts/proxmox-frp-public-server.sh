@@ -344,7 +344,8 @@ EOF_CLIENT
 chmod 600 /root/proxmox-frp-client.env
 
 systemctl daemon-reload
-systemctl enable --now frps proxmox-auth-gate nginx
+systemctl enable frps proxmox-auth-gate nginx
+systemctl restart frps proxmox-auth-gate nginx
 nginx -t
 systemctl reload nginx
 
