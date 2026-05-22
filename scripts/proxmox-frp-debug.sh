@@ -61,9 +61,32 @@ echo
 echo "[公网域名，未登录正常应 302 到 /login]"
 http_probe "https://${DOMAIN}/"
 
-try_cmd "frps 配置" bash -c 'test -f /etc/frp/frps.toml && mask_token < /etc/frp/frps.toml || true'
-try_cmd "frpc 配置" bash -c 'test -f /etc/frp/frpc.toml && mask_token < /etc/frp/frpc.toml || true'
-try_cmd "客户端变量" bash -c 'test -f /root/proxmox-frp-client.env && mask_token < /root/proxmox-frp-client.env || true'
+section "监听端口"
+if command -v ss >/dev/null 2>&1; then
+  ss -lntp | grep -E '(:7000|:7500|:9090|:18006|:80|:443)' || true
+elif command -v netstat >/dev/null 2>&1; then
+  netstat -lntp | grep -E '(:7000|:7500|:9090|:18006|:80|:443)' || true
+else
+  echo "ss/netstat not found"
+fi
+
+section "frps 配置"
+test -f /etc/frp/frps.toml && mask_token < /etc/frp/frps.toml || true
+
+section "frpc 配置"
+test -f /etc/frp/frpc.toml && mask_token < /etc/frp/frpc.toml || true
+
+section "客户端变量"
+test -f /root/proxmox-frp-client.env && mask_token < /root/proxmox-frp-client.env || true
+
+section "systemd 启动命令"
+systemctl cat frps proxmox-auth-gate nginx frpc 2>/dev/null | mask_token || true
+
+section "Nginx Proxmox 配置"
+test -f /etc/nginx/conf.d/proxmox-frp.conf && sed -n '1,220p' /etc/nginx/conf.d/proxmox-frp.conf || true
+
+section "Nginx 配置测试"
+nginx -t || true
 
 try_cmd "frps 最近日志" journalctl -u frps -n 80 --no-pager
 try_cmd "frpc 最近日志" journalctl -u frpc -n 80 --no-pager
