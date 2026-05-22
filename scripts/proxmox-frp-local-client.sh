@@ -74,7 +74,8 @@ WantedBy=multi-user.target
 EOF_SERVICE
 
 systemctl daemon-reload
-systemctl enable --now frpc
+systemctl enable frpc
+systemctl restart frpc
 
 echo
 echo "本地 frpc 部署完成。"
